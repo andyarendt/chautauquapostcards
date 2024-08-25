@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+header {
+    background-color: #355E3B;
+    color: white;
+    padding: 1em 0;
+}
+
+h1 {
+    margin: 0;
+}
+
+main {
+    padding: 2em;
+}
+
+.intro {
+    max-width: 600px;      /* Limit the width of the paragraph */
+    margin: 0.5em auto 2em; /* Center the paragraph and add space below */
+    padding: 0.5em 1em;     /* Keep the reduced padding for tighter spacing */
+    text-align: center;     /* Center the text within the paragraph */
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+.btn {
+    display: inline-block;
+    padding: 1em 2em;
+    background-color: #355E3B;
+    color: white;
+    text-decoration: none;
+    width: 220px; /* Ensures all buttons have the same width */
+    border-radius: 5px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.btn:hover {
+    background-color: #2A482F;
+}
+
+#gallery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.card {
+    display: none;
+    text-align: center;
+}
+
+.card img {
+    max-width: 100%;
+    height: auto;
+}
+
+#controls {
+    margin-top: 1em;
+}
+
+button {
+    padding: 0.5em 1em;
+    margin: 0 0.5em;
+    background-color: #355E3B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2A482F;
+}
