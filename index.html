@@ -31,7 +31,7 @@
       touch-action: pan-y;
       cursor: pointer;
     }
-    .nav-buttons button, .fullscreen-btn {
+    .nav-buttons button {
       padding: 10px 20px;
       margin: 0 10px;
       font-size: 1rem;
@@ -40,7 +40,7 @@
       border: none;
       cursor: pointer;
     }
-    .nav-buttons button:hover, .fullscreen-btn:hover {
+    .nav-buttons button:hover {
       background-color: #555;
     }
   </style>
@@ -52,7 +52,6 @@
     <div class="nav-buttons">
       <button onclick="prevImage()">Previous</button>
       <button onclick="nextImage()">Next</button>
-      <button class="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
     </div>
   </div>
 
@@ -84,24 +83,35 @@
       if (touchEndX > touchStartX + 30) prevImage();
     }
 
-    document.getElementById('postcard').addEventListener('touchstart', e => {
+    const postcard = document.getElementById('postcard');
+    postcard.addEventListener('touchstart', e => {
       touchStartX = e.changedTouches[0].screenX;
     });
 
-    document.getElementById('postcard').addEventListener('touchend', e => {
+    postcard.addEventListener('touchend', e => {
       touchEndX = e.changedTouches[0].screenX;
       handleGesture();
     });
 
-    // Fullscreen support
+    // Cross-browser fullscreen support for mobile
     function toggleFullscreen() {
-      const elem = document.getElementById('postcard');
-      if (!document.fullscreenElement) {
-        elem.requestFullscreen().catch(err => {
-          alert(`Error attempting to enable fullscreen mode: ${err.message}`);
-        });
+      const elem = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+          elem.msRequestFullscreen();
+        }
       } else {
-        document.exitFullscreen();
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+          document.msExitFullscreen();
+        }
       }
     }
   </script>
