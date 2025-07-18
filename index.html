@@ -5,20 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>New Piasa Chautauqua Postcard Gallery</title>
   <style>
-    html, body {
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
       margin: 0;
       padding: 0;
-      height: 100%;
-      background-color: #fefefe;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-    }
-    .gallery-container {
-      height: 100%;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
+    }
+    .gallery-container {
       text-align: center;
     }
     .gallery-title {
@@ -27,25 +24,15 @@
     }
     #fullscreen-container {
       display: inline-block;
-      width: 100%;
-      text-align: center;
     }
     .postcard-img {
-      width: 100%;
-      max-width: 100vw;
-      max-height: 100vh;
-      object-fit: contain;
-      border: none;
-      margin: 0;
+      max-width: 90vw;
+      max-height: 70vh;
+      border: 4px solid #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-bottom: 1rem;
       touch-action: pan-y;
       cursor: pointer;
-    }
-    .nav-buttons {
-      position: absolute;
-      bottom: 20px;
-      display: flex;
-      justify-content: center;
-      width: 100%;
     }
     .nav-buttons button {
       padding: 10px 20px;
@@ -64,8 +51,8 @@
 <body>
   <div class="gallery-container">
     <div class="gallery-title">New Piasa Chautauqua Postcard Gallery</div>
-    <div id="fullscreen-container">
-      <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" onclick="toggleFullscreen(event)" />
+    <div id="fullscreen-container" onclick="toggleFullscreen()">
+      <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" />
     </div>
     <div class="nav-buttons">
       <button onclick="prevImage()">Previous</button>
@@ -74,11 +61,12 @@
   </div>
 
   <script>
-    const imageCount = 20;
+    const imageCount = 20; // change this to match your total number of postcards
     let currentIndex = 1;
 
     function updateImage() {
-      document.getElementById('postcard').src = `images/${currentIndex}.jpg`;
+      const img = document.getElementById('postcard');
+      img.src = `images/${currentIndex}.jpg`;
     }
 
     function nextImage() {
@@ -104,21 +92,31 @@
     postcard.addEventListener('touchstart', e => {
       touchStartX = e.changedTouches[0].screenX;
     });
+
     postcard.addEventListener('touchend', e => {
       touchEndX = e.changedTouches[0].screenX;
       handleGesture();
     });
 
-    // Mobile-friendly fullscreen toggle
-    function toggleFullscreen(e) {
-      const container = e.currentTarget;
-      const request = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen;
-      const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
-
+    // Fullscreen using wrapper container for better mobile support
+    function toggleFullscreen() {
+      const container = document.getElementById('fullscreen-container');
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        request.call(container);
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) {
+          container.msRequestFullscreen();
+        }
       } else {
-        exit.call(document);
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
       }
     }
   </script>
