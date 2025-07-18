@@ -29,8 +29,9 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       margin-bottom: 1rem;
       touch-action: pan-y;
+      cursor: pointer;
     }
-    .nav-buttons button {
+    .nav-buttons button, .fullscreen-btn {
       padding: 10px 20px;
       margin: 0 10px;
       font-size: 1rem;
@@ -39,7 +40,7 @@
       border: none;
       cursor: pointer;
     }
-    .nav-buttons button:hover {
+    .nav-buttons button:hover, .fullscreen-btn:hover {
       background-color: #555;
     }
   </style>
@@ -47,15 +48,16 @@
 <body>
   <div class="gallery-container">
     <div class="gallery-title">New Piasa Chautauqua Postcard Gallery</div>
-    <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" />
+    <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" onclick="toggleFullscreen()" />
     <div class="nav-buttons">
       <button onclick="prevImage()">Previous</button>
       <button onclick="nextImage()">Next</button>
+      <button class="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
     </div>
   </div>
 
   <script>
-    const imageCount = 12; // change this to match your total number of postcards
+    const imageCount = 20; // change this to match your total number of postcards
     let currentIndex = 1;
 
     function updateImage() {
@@ -90,6 +92,18 @@
       touchEndX = e.changedTouches[0].screenX;
       handleGesture();
     });
+
+    // Fullscreen support
+    function toggleFullscreen() {
+      const elem = document.getElementById('postcard');
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => {
+          alert(`Error attempting to enable fullscreen mode: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
   </script>
 </body>
 </html>
