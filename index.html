@@ -1,21 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Postcard Collection</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Piasa Chautauqua Postcard Gallery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .gallery-container {
+      text-align: center;
+    }
+    .gallery-title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .postcard-img {
+      max-width: 90vw;
+      max-height: 70vh;
+      border: 4px solid #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-bottom: 1rem;
+      touch-action: pan-y;
+    }
+    .nav-buttons button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 1rem;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-buttons button:hover {
+      background-color: #555;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>New Piasa Chautauqua Postcards</h1>
-    </header>
-    <main>
-        <p class="intro">Please enjoy Andy's personal collection of New Piasa Chautuauqua Postcards:</p>
-        <div class="button-container">
-            <a href="color-gallery.html" class="btn">Color Postcards</a>
-            <a href="bw-gallery.html" class="btn">Black & White Postcards</a>
-        </div>
-    </main>
+  <div class="gallery-container">
+    <div class="gallery-title">New Piasa Chautauqua Postcard Gallery</div>
+    <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" />
+    <div class="nav-buttons">
+      <button onclick="prevImage()">Previous</button>
+      <button onclick="nextImage()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const imageCount = 12; // change this to match your total number of postcards
+    let currentIndex = 1;
+
+    function updateImage() {
+      const img = document.getElementById('postcard');
+      img.src = `images/${currentIndex}.jpg`;
+    }
+
+    function nextImage() {
+      currentIndex = (currentIndex % imageCount) + 1;
+      updateImage();
+    }
+
+    function prevImage() {
+      currentIndex = (currentIndex - 2 + imageCount) % imageCount + 1;
+      updateImage();
+    }
+
+    // Swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function handleGesture() {
+      if (touchEndX < touchStartX - 30) nextImage();
+      if (touchEndX > touchStartX + 30) prevImage();
+    }
+
+    document.getElementById('postcard').addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.getElementById('postcard').addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleGesture();
+    });
+  </script>
 </body>
 </html>
