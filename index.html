@@ -22,9 +22,6 @@
       font-size: 2rem;
       margin-bottom: 1rem;
     }
-    #fullscreen-container {
-      display: inline-block;
-    }
     .postcard-img {
       max-width: 90vw;
       max-height: 70vh;
@@ -51,9 +48,7 @@
 <body>
   <div class="gallery-container">
     <div class="gallery-title">New Piasa Chautauqua Postcard Gallery</div>
-    <div id="fullscreen-container" onclick="toggleFullscreen()">
-      <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" />
-    </div>
+    <img id="postcard" class="postcard-img" src="images/1.jpg" alt="Postcard" onclick="toggleFullscreen()" />
     <div class="nav-buttons">
       <button onclick="prevImage()">Previous</button>
       <button onclick="nextImage()">Next</button>
@@ -98,16 +93,16 @@
       handleGesture();
     });
 
-    // Fullscreen using wrapper container for better mobile support
+    // Image-specific fullscreen support
     function toggleFullscreen() {
-      const container = document.getElementById('fullscreen-container');
+      const elem = document.getElementById('postcard');
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (container.requestFullscreen) {
-          container.requestFullscreen();
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
-        } else if (container.msRequestFullscreen) {
-          container.msRequestFullscreen();
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
         }
       } else {
         if (document.exitFullscreen) {
