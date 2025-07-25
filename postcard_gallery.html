@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Postcard Gallery</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #333;
+    }
+
+    header p {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .gallery-item img:hover {
+      transform: scale(1.03);
+    }
+
+    #viewer {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      color: white;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #viewer.active {
+      display: flex;
+    }
+
+    .viewer-image {
+      text-align: center;
+      max-width: 90%;
+      max-height: 90%;
+    }
+
+    .viewer-image img {
+      width: auto;
+      height: 80vh;
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .caption {
+      margin-top: 8px;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 1.2rem;
+      background: none;
+      border: 2px solid white;
+      color: white;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>New Piasa Chautauqua Postcard Collection</h1>
+    <p>Swipe or use arrow keys to see front and back</p>
+  </header>
+
+  <div class="gallery" id="gallery"></div>
+
+  <div id="viewer" onclick="maybeCloseViewer(event)">
+    <button class="close-btn" onclick="closeViewer()">Close</button>
+    <div class="viewer-image">
+      <img id="postcardImage" src="" alt="Postcard View">
+      <div class="caption" id="imageCaption"></div>
+    </div>
+  </div>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    const viewer = document.getElementById('viewer');
+    const postcardImage = document.getElementById('postcardImage');
+    const caption = document.getElementById('imageCaption');
+
+    let currentIndex = 1;
+    const maxPostcards = 12;
+    let isFront = true;
+
+    // Create gallery thumbnails
+    for (let i = 1; i <= maxPostcards; i++) {
+      const div = document.createElement('div');
+      div.className = 'gallery-item';
+      const img = document.createElement('img');
+      img.src = `images/${i}-front.jpg`;
+      img.alt = `Postcard ${i} Front`;
+      img.onclick = () => openViewer(i);
+      div.appendChild(img);
+      gallery.appendChild(div);
+    }
+
+    function openViewer(index) {
+      currentIndex = index;
+      isFront = true;
+      viewer.classList.add('active');
+      updateViewer();
+    }
+
+    function closeViewer() {
+      viewer.classList.remove('active');
+    }
+
+    function maybeCloseViewer(event) {
+      if (event.target === viewer) {
+        closeViewer();
+      }
+    }
+
+    function updateViewer() {
+      const side = isFront ? 'front' : 'back';
+      postcardImage.src = `images/${currentIndex}-${side}.jpg`;
+      caption.textContent = side;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(event) {
+      if (!viewer.classList.contains('active')) return;
+
+      if (event.key === 'Escape') {
+        closeViewer();
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        isFront = !isFront;
+        updateViewer();
+      }
+    });
+
+    // Swipe gesture support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    viewer.addEventListener('touchstart', function(event) {
+      touchStartX = event.changedTouches[0].screenX;
+    }, false);
+
+    viewer.addEventListener('touchend', function(event) {
+      touchEndX = event.changedTouches[0].screenX;
+      handleGesture();
+    }, false);
+
+    function handleGesture() {
+      if (!viewer.classList.contains('active')) return;
+
+      if (touchEndX < touchStartX - 50) {
+        // swipe left
+        isFront = false;
+        updateViewer();
+      }
+
+      if (touchEndX > touchStartX + 50) {
+        // swipe right
+        isFront = true;
+        updateViewer();
+      }
+    }
+  </script>
+</body>
+</html>
