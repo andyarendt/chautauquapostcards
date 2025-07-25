@@ -85,7 +85,7 @@
     .caption {
       margin-top: 8px;
       font-size: 1.2rem;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     .close-btn {
@@ -119,7 +119,6 @@
 
   <header>
     <h1>New Piasa Chautauqua Postcard Collection</h1>
-    <p>Swipe or use arrow keys to see front and back</p>
   </header>
 
   <div class="gallery" id="gallery"></div>
@@ -174,7 +173,9 @@
     function updateViewer() {
       const side = isFront ? 'front' : 'back';
       postcardImage.src = `images/${currentIndex}-${side}.jpg`;
-      caption.textContent = side;
+      caption.textContent = isFront
+        ? 'swipe right/use right arrow key to see back'
+        : 'swipe left/use left arrow key to see front';
     }
 
     // Keyboard navigation
