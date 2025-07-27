@@ -22,12 +22,6 @@
       color: #333;
     }
 
-    header p {
-      margin-top: 10px;
-      font-size: 1rem;
-      color: #666;
-    }
-
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -68,6 +62,7 @@
     }
 
     .viewer-image {
+      position: relative;
       text-align: center;
       max-width: 100%;
       max-height: 100%;
@@ -80,12 +75,20 @@
       border-radius: 10px;
       display: block;
       margin: 0 auto;
+      touch-action: none;
+      transform-origin: center center;
+      transition: transform 0.2s ease;
     }
 
-    .caption {
-      margin-top: 8px;
-      font-size: 1.2rem;
-      text-transform: none;
+    .toggle-btn {
+      margin-top: 20px;
+      font-size: 1rem;
+      padding: 10px 20px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
     .close-btn {
@@ -119,6 +122,7 @@
 
   <header>
     <h1>New Piasa Chautauqua Postcard Collection</h1>
+    <p>Click images to enlarge</p>
   </header>
 
   <div class="gallery" id="gallery"></div>
@@ -127,7 +131,7 @@
     <button class="close-btn" onclick="closeViewer()">Close</button>
     <div class="viewer-image">
       <img id="postcardImage" src="" alt="Postcard View">
-      <div class="caption" id="imageCaption"></div>
+      <button class="toggle-btn" onclick="toggleSide()">Flip</button>
     </div>
   </div>
 
@@ -135,13 +139,11 @@
     const gallery = document.getElementById('gallery');
     const viewer = document.getElementById('viewer');
     const postcardImage = document.getElementById('postcardImage');
-    const caption = document.getElementById('imageCaption');
 
     let currentIndex = 1;
     const maxPostcards = 12;
     let isFront = true;
 
-    // Create gallery thumbnails
     for (let i = 1; i <= maxPostcards; i++) {
       const div = document.createElement('div');
       div.className = 'gallery-item';
@@ -162,6 +164,7 @@
 
     function closeViewer() {
       viewer.classList.remove('active');
+      resetZoom();
     }
 
     function maybeCloseViewer(event) {
@@ -173,50 +176,92 @@
     function updateViewer() {
       const side = isFront ? 'front' : 'back';
       postcardImage.src = `images/${currentIndex}-${side}.jpg`;
-      caption.textContent = isFront
-        ? 'swipe right/use right arrow key to see back'
-        : 'swipe left/use left arrow key to see front';
+      resetZoom();
     }
 
-    // Keyboard navigation
+    function toggleSide() {
+      isFront = !isFront;
+      updateViewer();
+    }
+
     document.addEventListener('keydown', function(event) {
       if (!viewer.classList.contains('active')) return;
+      if (event.key === 'Escape') closeViewer();
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') toggleSide();
+    });
 
-      if (event.key === 'Escape') {
-        closeViewer();
-      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        isFront = !isFront;
-        updateViewer();
+    // Zoom & pan support (preserved)
+    let initialDistance = 0, initialScale = 1, currentScale = 1;
+    let isDragging = false, startX = 0, startY = 0, translateX = 0, translateY = 0;
+    let lastTouchX = 0, lastTouchY = 0;
+
+    postcardImage.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        initialDistance = getDistance(e.touches[0], e.touches[1]);
+        initialScale = currentScale;
+      } else if (e.touches.length === 1 && currentScale > 1) {
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+      }
+    }, { passive: false });
+
+    postcardImage.addEventListener('touchmove', e => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const newDistance = getDistance(e.touches[0], e.touches[1]);
+        const scale = newDistance / initialDistance;
+        currentScale = Math.min(Math.max(1, initialScale * scale), 4);
+        updateTransform();
+      } else if (e.touches.length === 1 && currentScale > 1) {
+        e.preventDefault();
+        const deltaX = e.touches[0].clientX - lastTouchX;
+        const deltaY = e.touches[0].clientY - lastTouchY;
+        translateX += deltaX;
+        translateY += deltaY;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+        updateTransform();
+      }
+    }, { passive: false });
+
+    postcardImage.addEventListener('mousedown', e => {
+      if (currentScale > 1) {
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+        postcardImage.style.cursor = 'grabbing';
       }
     });
 
-    // Swipe gesture support
-    let touchStartX = 0;
-    let touchEndX = 0;
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      postcardImage.style.cursor = 'default';
+    });
 
-    viewer.addEventListener('touchstart', function(event) {
-      touchStartX = event.changedTouches[0].screenX;
-    }, false);
-
-    viewer.addEventListener('touchend', function(event) {
-      touchEndX = event.changedTouches[0].screenX;
-      handleGesture();
-    }, false);
-
-    function handleGesture() {
-      if (!viewer.classList.contains('active')) return;
-
-      if (touchEndX < touchStartX - 50) {
-        // swipe left
-        isFront = false;
-        updateViewer();
+    document.addEventListener('mousemove', e => {
+      if (isDragging) {
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        updateTransform();
       }
+    });
 
-      if (touchEndX > touchStartX + 50) {
-        // swipe right
-        isFront = true;
-        updateViewer();
-      }
+    function getDistance(t1, t2) {
+      const dx = t2.clientX - t1.clientX;
+      const dy = t2.clientY - t1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function updateTransform() {
+      postcardImage.style.transform = `scale(${currentScale}) translate(${translateX / currentScale}px, ${translateY / currentScale}px)`;
+    }
+
+    function resetZoom() {
+      currentScale = 1;
+      translateX = 0;
+      translateY = 0;
+      postcardImage.style.transform = 'scale(1) translate(0, 0)';
     }
   </script>
 </body>
