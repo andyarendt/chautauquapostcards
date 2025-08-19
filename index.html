@@ -144,8 +144,9 @@
     const postcardImage = document.getElementById('postcardImage');
 
     let currentIndex = 1;
-    const maxPostcards = 12;
+    const maxPostcards = 55;
     let isFront = true;
+    const imageCache = {};
 
     for (let i = 1; i <= maxPostcards; i++) {
       const div = document.createElement('div');
@@ -156,6 +157,14 @@
       img.onclick = () => openViewer(i);
       div.appendChild(img);
       gallery.appendChild(div);
+
+      const front = new Image();
+      front.src = `images/${i}-front.jpg`;
+      imageCache[`${i}-front`] = front;
+
+      const back = new Image();
+      back.src = `images/${i}-back.jpg`;
+      imageCache[`${i}-back`] = back;
     }
 
     function openViewer(index) {
@@ -177,7 +186,8 @@
 
     function updateViewer() {
       const side = isFront ? 'front' : 'back';
-      postcardImage.src = `images/${currentIndex}-${side}.jpg`;
+      const cachedImage = imageCache[`${currentIndex}-${side}`];
+      postcardImage.src = cachedImage ? cachedImage.src : `images/${currentIndex}-${side}.jpg`;
     }
 
     function toggleSide() {
