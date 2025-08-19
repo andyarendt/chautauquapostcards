@@ -83,8 +83,15 @@
       margin: 0 auto;
     }
 
-    .toggle-btn {
+    .viewer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
       margin-top: 20px;
+    }
+
+    .toggle-btn, .nav-btn {
       font-size: 1rem;
       padding: 10px 20px;
       background-color: #444;
@@ -134,7 +141,11 @@
     <button class="close-btn" onclick="closeViewer()">Close</button>
     <div class="viewer-image">
       <img id="postcardImage" src="" alt="Postcard View">
-      <button class="toggle-btn" onclick="toggleSide()">Flip</button>
+      <div class="viewer-nav">
+        <button class="nav-btn" onclick="prevPostcard()">←</button>
+        <button class="toggle-btn" onclick="toggleSide()">Flip</button>
+        <button class="nav-btn" onclick="nextPostcard()">→</button>
+      </div>
     </div>
   </div>
 
@@ -192,6 +203,18 @@
 
     function toggleSide() {
       isFront = !isFront;
+      updateViewer();
+    }
+
+    function prevPostcard() {
+      currentIndex = currentIndex > 1 ? currentIndex - 1 : maxPostcards;
+      isFront = true;
+      updateViewer();
+    }
+
+    function nextPostcard() {
+      currentIndex = currentIndex < maxPostcards ? currentIndex + 1 : 1;
+      isFront = true;
       updateViewer();
     }
 
