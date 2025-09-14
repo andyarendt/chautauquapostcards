@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,29 +155,100 @@
     const viewer = document.getElementById('viewer');
     const postcardImage = document.getElementById('postcardImage');
 
-    let currentIndex = 1;
-    const maxPostcards = 55;
+    const postcards = [
+      { front: 'images/1-front.jpg', back: 'images/1-back.jpg' },
+      { front: 'images/2-front.jpg', back: 'images/2-back.jpg' },
+      { front: 'images/3-front.jpg', back: 'images/3-back.jpg' },
+      { front: 'images/56-front.jpg', back: 'images/56-back.jpg' },
+      { front: 'images/4-front.jpg', back: 'images/4-back.jpg' },
+      { front: 'images/5-front.jpg', back: 'images/5-back.jpg' },
+      { front: 'images/6-front.jpg', back: 'images/6-back.jpg' },
+      { front: 'images/7-front.jpg', back: 'images/7-back.jpg' },
+      { front: 'images/8-front.jpg', back: 'images/8-back.jpg' },
+      { front: 'images/9-front.jpg', back: 'images/9-back.jpg' },
+      { front: 'images/10-front.jpg', back: 'images/10-back.jpg' },
+      { front: 'images/11-front.jpg', back: 'images/11-back.jpg' },
+      { front: 'images/12-front.jpg', back: 'images/12-back.jpg' },
+      { front: 'images/13-front.jpg', back: 'images/13-back.jpg' },
+      { front: 'images/14-front.jpg', back: 'images/14-back.jpg' },
+      { front: 'images/58-front.jpg', back: 'images/58-back.jpg' },
+      { front: 'images/59-front.jpg', back: 'images/59-back.jpg' },
+      { front: 'images/57-front.jpg', back: 'images/57-back.jpg' },
+      { front: 'images/67-front.jpg', back: 'images/67-back.jpg' },
+      { front: 'images/68-front.jpg', back: 'images/68-back.jpg' },
+      { front: 'images/15-front.jpg', back: 'images/15-back.jpg' },
+      { front: 'images/16-front.jpg', back: 'images/16-back.jpg' },
+      { front: 'images/17-front.jpg', back: 'images/17-back.jpg' },
+      { front: 'images/18-front.jpg', back: 'images/18-back.jpg' },
+      { front: 'images/19-front.jpg', back: 'images/19-back.jpg' },
+      { front: 'images/20-front.jpg', back: 'images/20-back.jpg' },
+      { front: 'images/21-front.jpg', back: 'images/21-back.jpg' },
+      { front: 'images/22-front.jpg', back: 'images/22-back.jpg' },
+      { front: 'images/69-front.jpg', back: 'images/69-back.jpg' },
+      { front: 'images/72-front.jpg', back: 'images/72-back.jpg' },
+      { front: 'images/23-front.jpg', back: 'images/23-back.jpg' },
+      { front: 'images/70-front.jpg', back: 'images/70-back.jpg' },
+      { front: 'images/71-front.jpg', back: 'images/71-back.jpg' },
+      { front: 'images/25-front.jpg', back: 'images/25-back.jpg' },
+      { front: 'images/26-front.jpg', back: 'images/26-back.jpg' },
+      { front: 'images/27-front.jpg', back: 'images/27-back.jpg' },
+      { front: 'images/64-front.jpg', back: 'images/64-back.jpg' },
+      { front: 'images/65-front.jpg', back: 'images/65-back.jpg' },
+      { front: 'images/66-front.jpg', back: 'images/66-back.jpg' },
+      { front: 'images/28-front.jpg', back: 'images/28-back.jpg' },
+      { front: 'images/29-front.jpg', back: 'images/29-back.jpg' },
+      { front: 'images/30-front.jpg', back: 'images/30-back.jpg' },
+      { front: 'images/31-front.jpg', back: 'images/31-back.jpg' },
+      { front: 'images/32-front.jpg', back: 'images/32-back.jpg' },
+      { front: 'images/33-front.jpg', back: 'images/33-back.jpg' },
+      { front: 'images/34-front.jpg', back: 'images/34-back.jpg' },
+      { front: 'images/35-front.jpg', back: 'images/35-back.jpg' },
+      { front: 'images/36-front.jpg', back: 'images/36-back.jpg' },
+      { front: 'images/62-front.jpg', back: 'images/62-back.jpg' },
+      { front: 'images/37-front.jpg', back: 'images/37-back.jpg' },
+      { front: 'images/63-front.jpg', back: 'images/63-back.jpg' },
+      { front: 'images/38-front.jpg', back: 'images/38-back.jpg' },
+      { front: 'images/39-front.jpg', back: 'images/39-back.jpg' },
+      { front: 'images/40-front.jpg', back: 'images/40-back.jpg' },
+      { front: 'images/41-front.jpg', back: 'images/41-back.jpg' },
+      { front: 'images/42-front.jpg', back: 'images/42-back.jpg' },
+      { front: 'images/43-front.jpg', back: 'images/43-back.jpg' },
+      { front: 'images/44-front.jpg', back: 'images/44-back.jpg' },
+      { front: 'images/60-front.jpg', back: 'images/60-back.jpg' },
+      { front: 'images/61-front.jpg', back: 'images/61-back.jpg' },
+      { front: 'images/45-front.jpg', back: 'images/45-back.jpg' },
+      { front: 'images/46-front.jpg', back: 'images/46-back.jpg' },
+      { front: 'images/47-front.jpg', back: 'images/47-back.jpg' },
+      { front: 'images/48-front.jpg', back: 'images/48-back.jpg' },
+      { front: 'images/49-front.jpg', back: 'images/49-back.jpg' },
+      { front: 'images/50-front.jpg', back: 'images/50-back.jpg' },
+      { front: 'images/51-front.jpg', back: 'images/51-back.jpg' },
+      { front: 'images/52-front.jpg', back: 'images/52-back.jpg' },
+      { front: 'images/54-front.jpg', back: 'images/54-back.jpg' }
+    ];
+
+    let currentIndex = 0;
     let isFront = true;
     const imageCache = {};
 
-    for (let i = 1; i <= maxPostcards; i++) {
+    postcards.forEach((card, index) => {
       const div = document.createElement('div');
       div.className = 'gallery-item';
       const img = document.createElement('img');
-      img.src = `images/${i}-front.jpg`;
-      img.alt = `Postcard ${i} Front`;
-      img.onclick = () => openViewer(i);
+      img.src = card.front;
+      img.alt = `Postcard ${index + 1} Front`;
+      img.onclick = () => openViewer(index);
       div.appendChild(img);
       gallery.appendChild(div);
 
       const front = new Image();
-      front.src = `images/${i}-front.jpg`;
-      imageCache[`${i}-front`] = front;
+      front.src = card.front;
+      imageCache[`${index}-front`] = front;
 
       const back = new Image();
-      back.src = `images/${i}-back.jpg`;
-      imageCache[`${i}-back`] = back;
-    }
+      back.src = card.back;
+      imageCache[`${index}-back`] = back;
+    });
 
     function openViewer(index) {
       currentIndex = index;
@@ -198,7 +270,7 @@
     function updateViewer() {
       const side = isFront ? 'front' : 'back';
       const cachedImage = imageCache[`${currentIndex}-${side}`];
-      postcardImage.src = cachedImage ? cachedImage.src : `images/${currentIndex}-${side}.jpg`;
+      postcardImage.src = cachedImage ? cachedImage.src : postcards[currentIndex][side];
     }
 
     function toggleSide() {
@@ -207,13 +279,13 @@
     }
 
     function prevPostcard() {
-      currentIndex = currentIndex > 1 ? currentIndex - 1 : maxPostcards;
+      currentIndex = currentIndex > 0 ? currentIndex - 1 : postcards.length - 1;
       isFront = true;
       updateViewer();
     }
 
     function nextPostcard() {
-      currentIndex = currentIndex < maxPostcards ? currentIndex + 1 : 1;
+      currentIndex = currentIndex < postcards.length - 1 ? currentIndex + 1 : 0;
       isFront = true;
       updateViewer();
     }
