@@ -237,18 +237,13 @@
       const img = document.createElement('img');
       img.src = card.front;
       img.alt = `Postcard ${index + 1} Front`;
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.onclick = () => openViewer(index);
       div.appendChild(img);
       gallery.appendChild(div);
 
-      const front = new Image();
-      front.src = card.front;
-      imageCache[`${index}-front`] = front;
-
-      const back = new Image();
-      back.src = card.back;
-      imageCache[`${index}-back`] = back;
-    });
+      });
 
     function openViewer(index) {
       currentIndex = index;
