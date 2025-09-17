@@ -264,7 +264,11 @@
 
     function updateViewer() {
       const side = isFront ? 'front' : 'back';
-      const cachedImage = imageCache[`${currentIndex}-${side}`];
+      const src = postcards[currentIndex][side];
+      postcardImage.decoding = 'async';
+      postcardImage.loading = 'eager';
+      postcardImage.src = src;
+    }-${side}`];
       postcardImage.src = cachedImage ? cachedImage.src : postcards[currentIndex][side];
     }
 
