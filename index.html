@@ -1,139 +1,52 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Postcard Gallery</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: #f9f9f9;
+    :root{
+      --bg:#f9f9f9; --text:#333; --muted:#666; --shadow:0 2px 8px rgba(0,0,0,.1);
+      --btn:#444; --btnActive:#111; --btnText:#fff; --accent:#999;
     }
+    *{box-sizing:border-box}
+    body{font-family:sans-serif;margin:0;background:var(--bg)}
+    header{ text-align:center; padding:28px 16px 8px; }
+    header h1{ margin:0; font-size:2rem; color:var(--text); }
+    header p{ margin:10px 0 14px; font-size:1rem; color:var(--muted); }
 
-    header {
-      text-align: center;
-      padding: 30px 20px 10px;
-    }
+    /* Toggle */
+    .toggle{ display:inline-flex; gap:6px; background:#eee; padding:6px; border-radius:999px; box-shadow:var(--shadow); }
+    .toggle button{ border:0; background:transparent; padding:10px 16px; border-radius:999px; cursor:pointer; font-weight:600; color:#333; }
+    .toggle button[aria-pressed="true"]{ background:#fff; box-shadow:var(--shadow); }
 
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #333;
-    }
+    .gallery{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; padding:20px; }
+    .gallery-item img{ width:100%; height:auto; border-radius:12px; cursor:pointer; box-shadow:var(--shadow); transition: transform .2s ease; }
+    .gallery-item img:hover{ transform: scale(1.03); }
 
-    header p {
-      margin-top: 10px;
-      font-size: 1rem;
-      color: #666;
-    }
+    /* Viewer */
+    #viewer{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.95); color:#fff; z-index:999; padding:10px; }
+    #viewer.active{ display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    .viewer-image{ position:relative; text-align:center; max-width:100%; max-height:100%; }
+    .viewer-image img{ width:100%; height:auto; max-height:80vh; border-radius:10px; display:block; margin:0 auto; }
+    .viewer-nav{ display:flex; align-items:center; justify-content:center; gap:20px; margin-top:20px; }
+    .toggle-btn, .nav-btn{ font-size:1rem; padding:10px 20px; background:var(--btn); color:var(--btnText); border:none; border-radius:8px; cursor:pointer; }
+    .close-btn{ position:absolute; top:20px; right:20px; font-size:1.1rem; background:none; border:2px solid #fff; color:#fff; padding:4px 10px; cursor:pointer; border-radius:6px; }
 
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: auto;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s ease;
-    }
-
-    .gallery-item img:hover {
-      transform: scale(1.03);
-    }
-
-    #viewer {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.95);
-      color: white;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-
-    #viewer.active {
-      display: flex;
-    }
-
-    .viewer-image {
-      position: relative;
-      text-align: center;
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    .viewer-image img {
-      width: 100%;
-      height: auto;
-      max-height: 80vh;
-      border-radius: 10px;
-      display: block;
-      margin: 0 auto;
-    }
-
-    .viewer-nav {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .toggle-btn, .nav-btn {
-      font-size: 1rem;
-      padding: 10px 20px;
-      background-color: #444;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 1.2rem;
-      background: none;
-      border: 2px solid white;
-      color: white;
-      padding: 4px 10px;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-
-    @media (max-width: 600px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        padding: 10px;
-      }
-
-      .viewer-image img {
-        width: 100%;
-        height: auto;
-        max-height: 70vh;
-      }
+    @media (max-width:600px){
+      .gallery{ grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); padding:10px; }
+      .viewer-image img{ max-height:70vh; }
     }
   </style>
 </head>
 <body>
-
   <header>
     <h1>New Piasa Chautauqua Postcard Collection</h1>
     <p>Click images to enlarge</p>
+    <div class="toggle" role="tablist" aria-label="Collection toggle">
+      <button id="tab-bw" role="tab" aria-selected="true" aria-pressed="true">Black & White</button>
+      <button id="tab-color" role="tab" aria-selected="false" aria-pressed="false">Color</button>
+    </div>
   </header>
 
   <div class="gallery" id="gallery"></div>
@@ -141,11 +54,11 @@
   <div id="viewer" onclick="maybeCloseViewer(event)">
     <button class="close-btn" onclick="closeViewer()">Close</button>
     <div class="viewer-image">
-      <img id="postcardImage" src="" alt="Postcard View">
+      <img id="postcardImage" src="" alt="Postcard View" />
       <div class="viewer-nav">
-        <button class="nav-btn" onclick="prevPostcard()">←</button>
-        <button class="toggle-btn" onclick="toggleSide()">Flip</button>
-        <button class="nav-btn" onclick="nextPostcard()">→</button>
+        <button class="nav-btn" onclick="prevPostcard()" aria-label="Previous">←</button>
+        <button class="toggle-btn" onclick="toggleSide()" aria-label="Flip front/back">Flip</button>
+        <button class="nav-btn" onclick="nextPostcard()" aria-label="Next">→</button>
       </div>
     </div>
   </div>
@@ -155,141 +68,213 @@
     const viewer = document.getElementById('viewer');
     const postcardImage = document.getElementById('postcardImage');
 
-    const postcards = [
-      { front: 'images/1-front.jpg', back: 'images/1-back.jpg' },
-      { front: 'images/2-front.jpg', back: 'images/2-back.jpg' },
-      { front: 'images/3-front.jpg', back: 'images/3-back.jpg' },
-      { front: 'images/56-front.jpg', back: 'images/56-back.jpg' },
-      { front: 'images/4-front.jpg', back: 'images/4-back.jpg' },
-      { front: 'images/5-front.jpg', back: 'images/5-back.jpg' },
-      { front: 'images/6-front.jpg', back: 'images/6-back.jpg' },
-      { front: 'images/7-front.jpg', back: 'images/7-back.jpg' },
-      { front: 'images/8-front.jpg', back: 'images/8-back.jpg' },
-      { front: 'images/9-front.jpg', back: 'images/9-back.jpg' },
-      { front: 'images/10-front.jpg', back: 'images/10-back.jpg' },
-      { front: 'images/11-front.jpg', back: 'images/11-back.jpg' },
-      { front: 'images/12-front.jpg', back: 'images/12-back.jpg' },
-      { front: 'images/13-front.jpg', back: 'images/13-back.jpg' },
-      { front: 'images/14-front.jpg', back: 'images/14-back.jpg' },
-      { front: 'images/58-front.jpg', back: 'images/58-back.jpg' },
-      { front: 'images/59-front.jpg', back: 'images/59-back.jpg' },
-      { front: 'images/57-front.jpg', back: 'images/57-back.jpg' },
-      { front: 'images/67-front.jpg', back: 'images/67-back.jpg' },
-      { front: 'images/68-front.jpg', back: 'images/68-back.jpg' },
-      { front: 'images/15-front.jpg', back: 'images/15-back.jpg' },
-      { front: 'images/16-front.jpg', back: 'images/16-back.jpg' },
-      { front: 'images/17-front.jpg', back: 'images/17-back.jpg' },
-      { front: 'images/18-front.jpg', back: 'images/18-back.jpg' },
-      { front: 'images/19-front.jpg', back: 'images/19-back.jpg' },
-      { front: 'images/20-front.jpg', back: 'images/20-back.jpg' },
-      { front: 'images/21-front.jpg', back: 'images/21-back.jpg' },
-      { front: 'images/22-front.jpg', back: 'images/22-back.jpg' },
-      { front: 'images/69-front.jpg', back: 'images/69-back.jpg' },
-      { front: 'images/72-front.jpg', back: 'images/72-back.jpg' },
-      { front: 'images/23-front.jpg', back: 'images/23-back.jpg' },
-      { front: 'images/70-front.jpg', back: 'images/70-back.jpg' },
-      { front: 'images/71-front.jpg', back: 'images/71-back.jpg' },
-      { front: 'images/25-front.jpg', back: 'images/25-back.jpg' },
-      { front: 'images/26-front.jpg', back: 'images/26-back.jpg' },
-      { front: 'images/27-front.jpg', back: 'images/27-back.jpg' },
-      { front: 'images/64-front.jpg', back: 'images/64-back.jpg' },
-      { front: 'images/65-front.jpg', back: 'images/65-back.jpg' },
-      { front: 'images/66-front.jpg', back: 'images/66-back.jpg' },
-      { front: 'images/28-front.jpg', back: 'images/28-back.jpg' },
-      { front: 'images/29-front.jpg', back: 'images/29-back.jpg' },
-      { front: 'images/30-front.jpg', back: 'images/30-back.jpg' },
-      { front: 'images/31-front.jpg', back: 'images/31-back.jpg' },
-      { front: 'images/32-front.jpg', back: 'images/32-back.jpg' },
-      { front: 'images/33-front.jpg', back: 'images/33-back.jpg' },
-      { front: 'images/34-front.jpg', back: 'images/34-back.jpg' },
-      { front: 'images/35-front.jpg', back: 'images/35-back.jpg' },
-      { front: 'images/36-front.jpg', back: 'images/36-back.jpg' },
-      { front: 'images/62-front.jpg', back: 'images/62-back.jpg' },
-      { front: 'images/37-front.jpg', back: 'images/37-back.jpg' },
-      { front: 'images/63-front.jpg', back: 'images/63-back.jpg' },
-      { front: 'images/38-front.jpg', back: 'images/38-back.jpg' },
-      { front: 'images/39-front.jpg', back: 'images/39-back.jpg' },
-      { front: 'images/40-front.jpg', back: 'images/40-back.jpg' },
-      { front: 'images/41-front.jpg', back: 'images/41-back.jpg' },
-      { front: 'images/42-front.jpg', back: 'images/42-back.jpg' },
-      { front: 'images/43-front.jpg', back: 'images/43-back.jpg' },
-      { front: 'images/44-front.jpg', back: 'images/44-back.jpg' },
-      { front: 'images/60-front.jpg', back: 'images/60-back.jpg' },
-      { front: 'images/61-front.jpg', back: 'images/61-back.jpg' },
-      { front: 'images/45-front.jpg', back: 'images/45-back.jpg' },
-      { front: 'images/46-front.jpg', back: 'images/46-back.jpg' },
-      { front: 'images/47-front.jpg', back: 'images/47-back.jpg' },
-      { front: 'images/48-front.jpg', back: 'images/48-back.jpg' },
-      { front: 'images/49-front.jpg', back: 'images/49-back.jpg' },
-      { front: 'images/50-front.jpg', back: 'images/50-back.jpg' },
-      { front: 'images/51-front.jpg', back: 'images/51-back.jpg' },
-      { front: 'images/52-front.jpg', back: 'images/52-back.jpg' },
-      { front: 'images/54-front.jpg', back: 'images/54-back.jpg' }
+    // ---- Data ----
+    const bwPostcards = [
+      { front: 'bw/1-front.jpg', back: 'bw/1-back.jpg' },
+      { front: 'bw/2-front.jpg', back: 'bw/2-back.jpg' },
+      { front: 'bw/3-front.jpg', back: 'bw/3-back.jpg' },
+      { front: 'bw/56-front.jpg', back: 'bw/56-back.jpg' },
+      { front: 'bw/4-front.jpg', back: 'bw/4-back.jpg' },
+      { front: 'bw/5-front.jpg', back: 'bw/5-back.jpg' },
+      { front: 'bw/6-front.jpg', back: 'bw/6-back.jpg' },
+      { front: 'bw/7-front.jpg', back: 'bw/7-back.jpg' },
+      { front: 'bw/8-front.jpg', back: 'bw/8-back.jpg' },
+      { front: 'bw/9-front.jpg', back: 'bw/9-back.jpg' },
+      { front: 'bw/10-front.jpg', back: 'bw/10-back.jpg' },
+      { front: 'bw/11-front.jpg', back: 'bw/11-back.jpg' },
+      { front: 'bw/12-front.jpg', back: 'bw/12-back.jpg' },
+      { front: 'bw/13-front.jpg', back: 'bw/13-back.jpg' },
+      { front: 'bw/14-front.jpg', back: 'bw/14-back.jpg' },
+      { front: 'bw/58-front.jpg', back: 'bw/58-back.jpg' },
+      { front: 'bw/59-front.jpg', back: 'bw/59-back.jpg' },
+      { front: 'bw/57-front.jpg', back: 'bw/57-back.jpg' },
+      { front: 'bw/67-front.jpg', back: 'bw/67-back.jpg' },
+      { front: 'bw/68-front.jpg', back: 'bw/68-back.jpg' },
+      { front: 'bw/15-front.jpg', back: 'bw/15-back.jpg' },
+      { front: 'bw/16-front.jpg', back: 'bw/16-back.jpg' },
+      { front: 'bw/17-front.jpg', back: 'bw/17-back.jpg' },
+      { front: 'bw/18-front.jpg', back: 'bw/18-back.jpg' },
+      { front: 'bw/19-front.jpg', back: 'bw/19-back.jpg' },
+      { front: 'bw/20-front.jpg', back: 'bw/20-back.jpg' },
+      { front: 'bw/21-front.jpg', back: 'bw/21-back.jpg' },
+      { front: 'bw/22-front.jpg', back: 'bw/22-back.jpg' },
+      { front: 'bw/69-front.jpg', back: 'bw/69-back.jpg' },
+      { front: 'bw/72-front.jpg', back: 'bw/72-back.jpg' },
+      { front: 'bw/23-front.jpg', back: 'bw/23-back.jpg' },
+      { front: 'bw/70-front.jpg', back: 'bw/70-back.jpg' },
+      { front: 'bw/71-front.jpg', back: 'bw/71-back.jpg' },
+      { front: 'bw/25-front.jpg', back: 'bw/25-back.jpg' },
+      { front: 'bw/26-front.jpg', back: 'bw/26-back.jpg' },
+      { front: 'bw/27-front.jpg', back: 'bw/27-back.jpg' },
+      { front: 'bw/64-front.jpg', back: 'bw/64-back.jpg' },
+      { front: 'bw/65-front.jpg', back: 'bw/65-back.jpg' },
+      { front: 'bw/66-front.jpg', back: 'bw/66-back.jpg' },
+      { front: 'bw/28-front.jpg', back: 'bw/28-back.jpg' },
+      { front: 'bw/29-front.jpg', back: 'bw/29-back.jpg' },
+      { front: 'bw/30-front.jpg', back: 'bw/30-back.jpg' },
+      { front: 'bw/31-front.jpg', back: 'bw/31-back.jpg' },
+      { front: 'bw/32-front.jpg', back: 'bw/32-back.jpg' },
+      { front: 'bw/33-front.jpg', back: 'bw/33-back.jpg' },
+      { front: 'bw/34-front.jpg', back: 'bw/34-back.jpg' },
+      { front: 'bw/35-front.jpg', back: 'bw/35-back.jpg' },
+      { front: 'bw/36-front.jpg', back: 'bw/36-back.jpg' },
+      { front: 'bw/62-front.jpg', back: 'bw/62-back.jpg' },
+      { front: 'bw/37-front.jpg', back: 'bw/37-back.jpg' },
+      { front: 'bw/63-front.jpg', back: 'bw/63-back.jpg' },
+      { front: 'bw/38-front.jpg', back: 'bw/38-back.jpg' },
+      { front: 'bw/39-front.jpg', back: 'bw/39-back.jpg' },
+      { front: 'bw/40-front.jpg', back: 'bw/40-back.jpg' },
+      { front: 'bw/41-front.jpg', back: 'bw/41-back.jpg' },
+      { front: 'bw/42-front.jpg', back: 'bw/42-back.jpg' },
+      { front: 'bw/43-front.jpg', back: 'bw/43-back.jpg' },
+      { front: 'bw/44-front.jpg', back: 'bw/44-back.jpg' },
+      { front: 'bw/60-front.jpg', back: 'bw/60-back.jpg' },
+      { front: 'bw/61-front.jpg', back: 'bw/61-back.jpg' },
+      { front: 'bw/45-front.jpg', back: 'bw/45-back.jpg' },
+      { front: 'bw/46-front.jpg', back: 'bw/46-back.jpg' },
+      { front: 'bw/47-front.jpg', back: 'bw/47-back.jpg' },
+      { front: 'bw/48-front.jpg', back: 'bw/48-back.jpg' },
+      { front: 'bw/49-front.jpg', back: 'bw/49-back.jpg' },
+      { front: 'bw/50-front.jpg', back: 'bw/50-back.jpg' },
+      { front: 'bw/51-front.jpg', back: 'bw/51-back.jpg' },
+      { front: 'bw/52-front.jpg', back: 'bw/52-back.jpg' },
+      { front: 'bw/54-front.jpg', back: 'bw/54-back.jpg' }
+    ];
+
+    const colorPostcards = [
+      { front: 'color/1-front.jpg', back: 'color/1-back.jpg' },
+      { front: 'color/2-front.jpg', back: 'color/2-back.jpg' },
+      { front: 'color/3-front.jpg', back: 'color/3-back.jpg' },
+      { front: 'color/4-front.jpg', back: 'color/4-back.jpg' },
+      { front: 'color/5-front.jpg', back: 'color/5-back.jpg' },
+      { front: 'color/6-front.jpg', back: 'color/6-back.jpg' },
+      { front: 'color/7-front.jpg', back: 'color/7-back.jpg' },
+      { front: 'color/8-front.jpg', back: 'color/8-back.jpg' },
+      { front: 'color/9-front.jpg', back: 'color/9-back.jpg' },
+      { front: 'color/10-front.jpg', back: 'color/10-back.jpg' },
+      { front: 'color/11-front.jpg', back: 'color/11-back.jpg' },
+      { front: 'color/12-front.jpg', back: 'color/12-back.jpg' },
+      { front: 'color/13-front.jpg', back: 'color/13-back.jpg' },
+      { front: 'color/14-front.jpg', back: 'color/14-back.jpg' },
+      { front: 'color/15-front.jpg', back: 'color/15-back.jpg' },
+      { front: 'color/16-front.jpg', back: 'color/16-back.jpg' },
+      { front: 'color/17-front.jpg', back: 'color/17-back.jpg' },
+      { front: 'color/18-front.jpg', back: 'color/18-back.jpg' },
+      { front: 'color/19-front.jpg', back: 'color/19-back.jpg' },
+      { front: 'color/20-front.jpg', back: 'color/20-back.jpg' },
+      { front: 'color/21-front.jpg', back: 'color/21-back.jpg' },
+      { front: 'color/22-front.jpg', back: 'color/22-back.jpg' },
+      { front: 'color/23-front.jpg', back: 'color/23-back.jpg' },
+      { front: 'color/24-front.jpg', back: 'color/24-back.jpg' },
+      { front: 'color/25-front.jpg', back: 'color/25-back.jpg' },
+      { front: 'color/26-front.jpg', back: 'color/26-back.jpg' },
+      { front: 'color/27-front.jpg', back: 'color/27-back.jpg' },
+      { front: 'color/28-front.jpg', back: 'color/28-back.jpg' },
+      { front: 'color/29-front.jpg', back: 'color/29-back.jpg' },
+      { front: 'color/30-front.jpg', back: 'color/30-back.jpg' },
+      { front: 'color/31-front.jpg', back: 'color/31-back.jpg' },
+      { front: 'color/32-front.jpg', back: 'color/32-back.jpg' },
+      { front: 'color/33-front.jpg', back: 'color/33-back.jpg' },
+      { front: 'color/34-front.jpg', back: 'color/34-back.jpg' },
+      { front: 'color/35-front.jpg', back: 'color/35-back.jpg' },
+      { front: 'color/36-front.jpg', back: 'color/36-back.jpg' },
+      { front: 'color/37-front.jpg', back: 'color/37-back.jpg' },
+      { front: 'color/38-front.jpg', back: 'color/38-back.jpg' },
+      { front: 'color/39-front.jpg', back: 'color/39-back.jpg' },
+      { front: 'color/40-front.jpg', back: 'color/40-back.jpg' },
+      { front: 'color/41-front.jpg', back: 'color/41-back.jpg' }
     ];
 
     let currentIndex = 0;
     let isFront = true;
+    let currentSet = 'bw';
     const imageCache = {};
 
-    postcards.forEach((card, index) => {
-      const div = document.createElement('div');
-      div.className = 'gallery-item';
-      const img = document.createElement('img');
-      img.src = card.front;
-      img.alt = `Postcard ${index + 1} Front`;
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.onclick = () => openViewer(index);
-      div.appendChild(img);
-      gallery.appendChild(div);
+    const tabBW = document.getElementById('tab-bw');
+    const tabColor = document.getElementById('tab-color');
 
+    tabBW.addEventListener('click', () => switchSet('bw'));
+    tabColor.addEventListener('click', () => switchSet('color'));
+
+    function switchSet(set){
+      if(set === currentSet) return;
+      currentSet = set;
+      const isBW = set === 'bw';
+      tabBW.setAttribute('aria-selected', isBW);
+      tabBW.setAttribute('aria-pressed', isBW);
+      tabColor.setAttribute('aria-selected', !isBW);
+      tabColor.setAttribute('aria-pressed', !isBW);
+      closeViewer();
+      renderGallery();
+      if(getCards().length === 0){
+        gallery.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#666;margin:20px 0;">No color postcards yet. Check back soon!</p>`;
+      }
+    }
+
+    function getCards(){
+      return currentSet === 'bw' ? bwPostcards : colorPostcards;
+    }
+
+    function renderGallery(){
+      gallery.innerHTML = '';
+      getCards().forEach((card, index) => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        const img = document.createElement('img');
+        img.src = card.front;
+        img.alt = `Postcard ${index + 1} Front`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.onclick = () => openViewer(index);
+        div.appendChild(img);
+        gallery.appendChild(div);
       });
+    }
 
-    function openViewer(index) {
+    function openViewer(index){
       currentIndex = index;
       isFront = true;
       viewer.classList.add('active');
       updateViewer();
     }
 
-    function closeViewer() {
-      viewer.classList.remove('active');
-    }
+    function closeViewer(){ viewer.classList.remove('active'); }
 
-    function maybeCloseViewer(event) {
-      if (event.target === viewer) {
-        closeViewer();
-      }
-    }
+    function maybeCloseViewer(event){ if(event.target === viewer){ closeViewer(); } }
 
-    function updateViewer() {
+    function updateViewer(){
+      const cards = getCards();
+      if(cards.length === 0) return;
       const side = isFront ? 'front' : 'back';
-      const cachedImage = imageCache[`${currentIndex}-${side}`];
-      postcardImage.src = cachedImage ? cachedImage.src : postcards[currentIndex][side];
+      const cached = imageCache[`${currentSet}-${currentIndex}-${side}`];
+      const src = cached ? cached.src : cards[currentIndex][side];
+      postcardImage.src = src;
     }
 
-    function toggleSide() {
-      isFront = !isFront;
-      updateViewer();
+    function toggleSide(){ isFront = !isFront; updateViewer(); }
+
+    function prevPostcard(){
+      const cards = getCards();
+      if(cards.length === 0) return;
+      currentIndex = currentIndex > 0 ? currentIndex - 1 : cards.length - 1;
+      isFront = true; updateViewer();
+    }
+    function nextPostcard(){
+      const cards = getCards();
+      if(cards.length === 0) return;
+      currentIndex = currentIndex < cards.length - 1 ? currentIndex + 1 : 0;
+      isFront = true; updateViewer();
     }
 
-    function prevPostcard() {
-      currentIndex = currentIndex > 0 ? currentIndex - 1 : postcards.length - 1;
-      isFront = true;
-      updateViewer();
-    }
-
-    function nextPostcard() {
-      currentIndex = currentIndex < postcards.length - 1 ? currentIndex + 1 : 0;
-      isFront = true;
-      updateViewer();
-    }
-
-    document.addEventListener('keydown', function(event) {
-      if (!viewer.classList.contains('active')) return;
-      if (event.key === 'Escape') closeViewer();
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') toggleSide();
+    document.addEventListener('keydown', function(event){
+      if(!viewer.classList.contains('active')) return;
+      if(event.key === 'Escape') closeViewer();
+      if(event.key === 'ArrowLeft') prevPostcard();
+      if(event.key === 'ArrowRight') nextPostcard();
+      if(event.code === 'Space'){ event.preventDefault(); toggleSide(); }
     });
+
+    renderGallery();
   </script>
 </body>
 </html>
