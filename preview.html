@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Postcard Gallery - Redesign Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #faf7f0;
+      --bg-secondary: #f5f1e8;
+      --text-primary: #2c2416;
+      --text-secondary: #6b5d4f;
+      --text-muted: #8e7f6f;
+      --accent: #c17854;
+      --accent-hover: #a66345;
+      --shadow-sm: 0 2px 8px rgba(44, 36, 22, 0.08);
+      --shadow-md: 0 4px 16px rgba(44, 36, 22, 0.12);
+      --shadow-lg: 0 8px 32px rgba(44, 36, 22, 0.16);
+      --border-color: rgba(44, 36, 22, 0.1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(193, 120, 84, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(193, 120, 84, 0.03) 0%, transparent 50%);
+    }
+
+    header {
+      text-align: center;
+      padding: 60px 24px 40px;
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    header h1 {
+      font-family: 'Merriweather', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    header .subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    header .description {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .toggle {
+      display: inline-flex;
+      gap: 4px;
+      background: white;
+      padding: 6px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .toggle button {
+      border: none;
+      background: transparent;
+      padding: 12px 24px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .toggle button:hover {
+      color: var(--accent);
+    }
+
+    .toggle button[aria-pressed="true"] {
+      background: var(--accent);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stats {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 32px;
+      padding: 40px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .gallery-item {
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .gallery-item:nth-child(1) { animation-delay: 0.05s; }
+    .gallery-item:nth-child(2) { animation-delay: 0.1s; }
+    .gallery-item:nth-child(3) { animation-delay: 0.15s; }
+    .gallery-item:nth-child(4) { animation-delay: 0.2s; }
+    .gallery-item:nth-child(5) { animation-delay: 0.25s; }
+    .gallery-item:nth-child(6) { animation-delay: 0.3s; }
+
+    .postcard-frame {
+      background: white;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .postcard-frame:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .postcard-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--radius-sm);
+    }
+
+    #viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 36, 22, 0.96);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #viewer.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+    }
+
+    .viewer-container {
+      position: relative;
+      max-width: 90%;
+      max-height: 90vh;
+      animation: scaleIn 0.3s ease;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .viewer-image {
+      position: relative;
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .viewer-image img {
+      width: 100%;
+      height: auto;
+      max-height: 70vh;
+      display: block;
+      margin: 0 auto;
+      border-radius: var(--radius-sm);
+    }
+
+    .close-btn {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      font-size: 1rem;
+      background: white;
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-md);
+      z-index: 1000;
+    }
+
+    .close-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .viewer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+    }
+
+    .nav-btn, .toggle-btn {
+      font-size: 1.1rem;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-btn:hover, .toggle-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-btn:active, .toggle-btn:active {
+      transform: translateY(0);
+    }
+
+    .toggle-btn {
+      background: white;
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
+    }
+
+    .toggle-btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent);
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      margin-top: 60px;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state h3 {
+      font-family: 'Merriweather', serif;
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 40px 20px 32px;
+      }
+
+      header h1 {
+        font-size: 2rem;
+      }
+
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 24px;
+        padding: 32px 20px;
+      }
+
+      .viewer-image {
+        padding: 12px;
+      }
+
+      .viewer-image img {
+        max-height: 60vh;
+      }
+
+      .viewer-nav {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .nav-btn, .toggle-btn {
+        flex: 1;
+        min-width: 80px;
+      }
+
+      .close-btn {
+        top: 16px;
+        right: 16px;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .gallery {
+        grid-template-columns: 1fr;
+        padding: 24px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>New Piasa Chautauqua Postcard Collection</h1>
+    <p class="subtitle">A Historic Journey Through Time</p>
+    <p class="description">Explore vintage postcards capturing the essence of New Piasa Chautauqua's rich history</p>
+    <div class="toggle" role="tablist" aria-label="Collection toggle">
+      <button id="tab-bw" role="tab" aria-selected="true" aria-pressed="true">Black & White</button>
+      <button id="tab-color" role="tab" aria-selected="false" aria-pressed="false">Color</button>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="gallery" id="gallery"></div>
+
+  <div id="viewer" onclick="maybeCloseViewer(event)">
+    <button class="close-btn" onclick="closeViewer()">✕ Close</button>
+    <div class="viewer-container">
+      <div class="viewer-image">
+        <img id="postcardImage" src="" alt="Postcard View" />
+        <div class="viewer-nav">
+          <button class="nav-btn" onclick="prevPostcard()" aria-label="Previous">← Prev</button>
+          <button class="toggle-btn" onclick="toggleSide()" aria-label="Flip front/back">Flip Card</button>
+          <button class="nav-btn" onclick="nextPostcard()" aria-label="Next">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>New Piasa Chautauqua Postcard Collection</p>
+    <p style="margin-top: 8px; font-size: 0.85rem;">Click any postcard to view details • Use arrow keys to navigate</p>
+  </footer>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    const viewer = document.getElementById('viewer');
+    const postcardImage = document.getElementById('postcardImage');
+    const statsEl = document.getElementById('stats');
+
+    const bwPostcards = [
+      { front: 'bw/1-front.jpg', back: 'bw/1-back.jpg' },
+      { front: 'bw/2-front.jpg', back: 'bw/2-back.jpg' },
+      { front: 'bw/3-front.jpg', back: 'bw/3-back.jpg' },
+      { front: 'bw/56-front.jpg', back: 'bw/56-back.jpg' },
+      { front: 'bw/4-front.jpg', back: 'bw/4-back.jpg' },
+      { front: 'bw/5-front.jpg', back: 'bw/5-back.jpg' },
+      { front: 'bw/6-front.jpg', back: 'bw/6-back.jpg' },
+      { front: 'bw/7-front.jpg', back: 'bw/7-back.jpg' },
+      { front: 'bw/8-front.jpg', back: 'bw/8-back.jpg' },
+      { front: 'bw/9-front.jpg', back: 'bw/9-back.jpg' },
+      { front: 'bw/10-front.jpg', back: 'bw/10-back.jpg' },
+      { front: 'bw/11-front.jpg', back: 'bw/11-back.jpg' },
+      { front: 'bw/12-front.jpg', back: 'bw/12-back.jpg' },
+      { front: 'bw/13-front.jpg', back: 'bw/13-back.jpg' },
+      { front: 'bw/14-front.jpg', back: 'bw/14-back.jpg' },
+      { front: 'bw/58-front.jpg', back: 'bw/58-back.jpg' },
+      { front: 'bw/59-front.jpg', back: 'bw/59-back.jpg' },
+      { front: 'bw/57-front.jpg', back: 'bw/57-back.jpg' },
+      { front: 'bw/67-front.jpg', back: 'bw/67-back.jpg' },
+      { front: 'bw/68-front.jpg', back: 'bw/68-back.jpg' },
+      { front: 'bw/15-front.jpg', back: 'bw/15-back.jpg' },
+      { front: 'bw/16-front.jpg', back: 'bw/16-back.jpg' },
+      { front: 'bw/17-front.jpg', back: 'bw/17-back.jpg' },
+      { front: 'bw/18-front.jpg', back: 'bw/18-back.jpg' },
+      { front: 'bw/19-front.jpg', back: 'bw/19-back.jpg' },
+      { front: 'bw/20-front.jpg', back: 'bw/20-back.jpg' },
+      { front: 'bw/21-front.jpg', back: 'bw/21-back.jpg' },
+      { front: 'bw/22-front.jpg', back: 'bw/22-back.jpg' },
+      { front: 'bw/69-front.jpg', back: 'bw/69-back.jpg' },
+      { front: 'bw/72-front.jpg', back: 'bw/72-back.jpg' },
+      { front: 'bw/23-front.jpg', back: 'bw/23-back.jpg' },
+      { front: 'bw/70-front.jpg', back: 'bw/70-back.jpg' },
+      { front: 'bw/71-front.jpg', back: 'bw/71-back.jpg' },
+      { front: 'bw/25-front.jpg', back: 'bw/25-back.jpg' },
+      { front: 'bw/26-front.jpg', back: 'bw/26-back.jpg' },
+      { front: 'bw/27-front.jpg', back: 'bw/27-back.jpg' },
+      { front: 'bw/64-front.jpg', back: 'bw/64-back.jpg' },
+      { front: 'bw/65-front.jpg', back: 'bw/65-back.jpg' },
+      { front: 'bw/66-front.jpg', back: 'bw/66-back.jpg' },
+      { front: 'bw/28-front.jpg', back: 'bw/28-back.jpg' },
+      { front: 'bw/29-front.jpg', back: 'bw/29-back.jpg' },
+      { front: 'bw/30-front.jpg', back: 'bw/30-back.jpg' },
+      { front: 'bw/31-front.jpg', back: 'bw/31-back.jpg' },
+      { front: 'bw/32-front.jpg', back: 'bw/32-back.jpg' },
+      { front: 'bw/33-front.jpg', back: 'bw/33-back.jpg' },
+      { front: 'bw/34-front.jpg', back: 'bw/34-back.jpg' },
+      { front: 'bw/35-front.jpg', back: 'bw/35-back.jpg' },
+      { front: 'bw/36-front.jpg', back: 'bw/36-back.jpg' },
+      { front: 'bw/62-front.jpg', back: 'bw/62-back.jpg' },
+      { front: 'bw/37-front.jpg', back: 'bw/37-back.jpg' },
+      { front: 'bw/63-front.jpg', back: 'bw/63-back.jpg' },
+      { front: 'bw/38-front.jpg', back: 'bw/38-back.jpg' },
+      { front: 'bw/39-front.jpg', back: 'bw/39-back.jpg' },
+      { front: 'bw/40-front.jpg', back: 'bw/40-back.jpg' },
+      { front: 'bw/41-front.jpg', back: 'bw/41-back.jpg' },
+      { front: 'bw/42-front.jpg', back: 'bw/42-back.jpg' },
+      { front: 'bw/43-front.jpg', back: 'bw/43-back.jpg' },
+      { front: 'bw/44-front.jpg', back: 'bw/44-back.jpg' },
+      { front: 'bw/60-front.jpg', back: 'bw/60-back.jpg' },
+      { front: 'bw/61-front.jpg', back: 'bw/61-back.jpg' },
+      { front: 'bw/45-front.jpg', back: 'bw/45-back.jpg' },
+      { front: 'bw/46-front.jpg', back: 'bw/46-back.jpg' },
+      { front: 'bw/47-front.jpg', back: 'bw/47-back.jpg' },
+      { front: 'bw/48-front.jpg', back: 'bw/48-back.jpg' },
+      { front: 'bw/49-front.jpg', back: 'bw/49-back.jpg' },
+      { front: 'bw/50-front.jpg', back: 'bw/50-back.jpg' },
+      { front: 'bw/51-front.jpg', back: 'bw/51-back.jpg' },
+      { front: 'bw/52-front.jpg', back: 'bw/52-back.jpg' },
+      { front: 'bw/54-front.jpg', back: 'bw/54-back.jpg' }
+    ];
+
+    const colorPostcards = [
+      { front: 'color/1-front.jpg', back: 'color/1-back.jpg' },
+      { front: 'color/2-front.jpg', back: 'color/2-back.jpg' },
+      { front: 'color/3-front.jpg', back: 'color/3-back.jpg' },
+      { front: 'color/4-front.jpg', back: 'color/4-back.jpg' },
+      { front: 'color/5-front.jpg', back: 'color/5-back.jpg' },
+      { front: 'color/6-front.jpg', back: 'color/6-back.jpg' },
+      { front: 'color/7-front.jpg', back: 'color/7-back.jpg' },
+      { front: 'color/8-front.jpg', back: 'color/8-back.jpg' },
+      { front: 'color/9-front.jpg', back: 'color/9-back.jpg' },
+      { front: 'color/10-front.jpg', back: 'color/10-back.jpg' },
+      { front: 'color/11-front.jpg', back: 'color/11-back.jpg' },
+      { front: 'color/12-front.jpg', back: 'color/12-back.jpg' },
+      { front: 'color/13-front.jpg', back: 'color/13-back.jpg' },
+      { front: 'color/14-front.jpg', back: 'color/14-back.jpg' },
+      { front: 'color/15-front.jpg', back: 'color/15-back.jpg' },
+      { front: 'color/16-front.jpg', back: 'color/16-back.jpg' },
+      { front: 'color/17-front.jpg', back: 'color/17-back.jpg' },
+      { front: 'color/18-front.jpg', back: 'color/18-back.jpg' },
+      { front: 'color/19-front.jpg', back: 'color/19-back.jpg' },
+      { front: 'color/20-front.jpg', back: 'color/20-back.jpg' },
+      { front: 'color/21-front.jpg', back: 'color/21-back.jpg' },
+      { front: 'color/22-front.jpg', back: 'color/22-back.jpg' },
+      { front: 'color/23-front.jpg', back: 'color/23-back.jpg' },
+      { front: 'color/24-front.jpg', back: 'color/24-back.jpg' },
+      { front: 'color/25-front.jpg', back: 'color/25-back.jpg' },
+      { front: 'color/26-front.jpg', back: 'color/26-back.jpg' },
+      { front: 'color/27-front.jpg', back: 'color/27-back.jpg' },
+      { front: 'color/28-front.jpg', back: 'color/28-back.jpg' },
+      { front: 'color/29-front.jpg', back: 'color/29-back.jpg' },
+      { front: 'color/30-front.jpg', back: 'color/30-back.jpg' },
+      { front: 'color/31-front.jpg', back: 'color/31-back.jpg' },
+      { front: 'color/32-front.jpg', back: 'color/32-back.jpg' },
+      { front: 'color/33-front.jpg', back: 'color/33-back.jpg' },
+      { front: 'color/34-front.jpg', back: 'color/34-back.jpg' },
+      { front: 'color/35-front.jpg', back: 'color/35-back.jpg' },
+      { front: 'color/36-front.jpg', back: 'color/36-back.jpg' },
+      { front: 'color/37-front.jpg', back: 'color/37-back.jpg' },
+      { front: 'color/38-front.jpg', back: 'color/38-back.jpg' },
+      { front: 'color/39-front.jpg', back: 'color/39-back.jpg' },
+      { front: 'color/40-front.jpg', back: 'color/40-back.jpg' },
+      { front: 'color/41-front.jpg', back: 'color/41-back.jpg' }
+    ];
+
+    let currentIndex = 0;
+    let isFront = true;
+    let currentSet = 'bw';
+    const imageCache = {};
+
+    const tabBW = document.getElementById('tab-bw');
+    const tabColor = document.getElementById('tab-color');
+
+    tabBW.addEventListener('click', () => switchSet('bw'));
+    tabColor.addEventListener('click', () => switchSet('color'));
+
+    function switchSet(set) {
+      if (set === currentSet) return;
+      currentSet = set;
+      const isBW = set === 'bw';
+      tabBW.setAttribute('aria-selected', isBW);
+      tabBW.setAttribute('aria-pressed', isBW);
+      tabColor.setAttribute('aria-selected', !isBW);
+      tabColor.setAttribute('aria-pressed', !isBW);
+      closeViewer();
+      renderGallery();
+      updateStats();
+    }
+
+    function getCards() {
+      return currentSet === 'bw' ? bwPostcards : colorPostcards;
+    }
+
+    function updateStats() {
+      const cards = getCards();
+      const collectionName = currentSet === 'bw' ? 'Black & White' : 'Color';
+      statsEl.textContent = `Viewing ${cards.length} ${collectionName} postcards`;
+    }
+
+    function renderGallery() {
+      gallery.innerHTML = '';
+      const cards = getCards();
+
+      if (cards.length === 0) {
+        gallery.innerHTML = `
+          <div class="empty-state">
+            <h3>Coming Soon</h3>
+            <p>Color postcards will be added to the collection shortly. Check back soon!</p>
+          </div>
+        `;
+        return;
+      }
+
+      cards.forEach((card, index) => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+
+        const frame = document.createElement('div');
+        frame.className = 'postcard-frame';
+
+        const img = document.createElement('img');
+        img.src = card.front;
+        img.alt = `Postcard ${index + 1} Front`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+
+        frame.onclick = () => openViewer(index);
+        frame.appendChild(img);
+        div.appendChild(frame);
+        gallery.appendChild(div);
+      });
+    }
+
+    function openViewer(index) {
+      currentIndex = index;
+      isFront = true;
+      viewer.classList.add('active');
+      updateViewer();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeViewer() {
+      viewer.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function maybeCloseViewer(event) {
+      if (event.target === viewer) {
+        closeViewer();
+      }
+    }
+
+    function updateViewer() {
+      const cards = getCards();
+      if (cards.length === 0) return;
+      const side = isFront ? 'front' : 'back';
+      const cached = imageCache[`${currentSet}-${currentIndex}-${side}`];
+      const src = cached ? cached.src : cards[currentIndex][side];
+      postcardImage.src = src;
+    }
+
+    function toggleSide() {
+      isFront = !isFront;
+      updateViewer();
+    }
+
+    function prevPostcard() {
+      const cards = getCards();
+      if (cards.length === 0) return;
+      currentIndex = currentIndex > 0 ? currentIndex - 1 : cards.length - 1;
+      isFront = true;
+      updateViewer();
+    }
+
+    function nextPostcard() {
+      const cards = getCards();
+      if (cards.length === 0) return;
+      currentIndex = currentIndex < cards.length - 1 ? currentIndex + 1 : 0;
+      isFront = true;
+      updateViewer();
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (!viewer.classList.contains('active')) return;
+      if (event.key === 'Escape') closeViewer();
+      if (event.key === 'ArrowLeft') prevPostcard();
+      if (event.key === 'ArrowRight') nextPostcard();
+      if (event.code === 'Space') {
+        event.preventDefault();
+        toggleSide();
+      }
+    });
+
+    renderGallery();
+    updateStats();
+  </script>
+</body>
+</html>
